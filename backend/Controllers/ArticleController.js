@@ -17,6 +17,7 @@ const getArticles = async (req, res) => {
 // Create a new article
 const createArticle = async (req, res) => {
     const {
+        code,
         libelle,
         libelleFamille,
         Nombre_unite,
@@ -67,6 +68,7 @@ const createArticle = async (req, res) => {
 
         // Créer un nouvel article
         const newArticle = await Article.create({
+            code,
             libelle,
             libelleFamille,
             Nombre_unite,
@@ -216,6 +218,20 @@ const updateArticle = async (req, res) => {
     }
 };
 
+// Récupérer un article par son code
+const getArticleByCode = async (req, res) => {
+    try {
+        console.log("backend =",req.params.code);
+        const article = await Article.findOne({ code: req.params.code });
+        console.log("article =", article);
+        if (!article) {
+            return res.status(404).json({ message: 'Article non trouvé' });
+        }
+        res.status(200).json(article);
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur', error });
+    }
+};
 // Delete article
 const deleteArticle = async (req, res) => {
     try {
@@ -238,4 +254,4 @@ const deleteArticle = async (req, res) => {
     }
 };
 
-module.exports = { getArticles, getArticleByID, createArticle, updateArticle, deleteArticle };
+module.exports = { getArticles, getArticleByID, createArticle, updateArticle, deleteArticle , getArticleByCode  };

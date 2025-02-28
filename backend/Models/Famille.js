@@ -1,19 +1,10 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-// Définition du schéma pour Famille
 const FamilleSchema = new mongoose.Schema({
-    codeFamille: {
-        type: String,
-        required: true,
-        unique: true, 
-      },
-      designationFamille: {
-        type: String,
-        required: true,
-      },
+    designationFamille: { type: String, required: true },
+   // categorie: { type: mongoose.Schema.Types.ObjectId, ref: "Categorie", required: true } // Relation avec Categorie
 });
 
-// Création du modèle Famille
-const Famille = mongoose.model('Famille', FamilleSchema);
 
+const Famille = mongoose.model("Famille", FamilleSchema);
 module.exports = Famille;

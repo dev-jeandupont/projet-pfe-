@@ -8,7 +8,6 @@ const categorieRoutes = require("./Routes/categorieRoutes");
 const familleRoutes = require("./Routes/familleRoutes");
 const articleRoutes = require("./Routes/articleRoutes");
 const enteteRoutes = require('./Routes/enteteRoutes');
-const ligneRoutes = require('./Routes/ligneRoutes');
 require('dotenv').config();
 require('./Models/db');
 const PORT = process.env.PORT || 5000;
@@ -27,7 +26,6 @@ app.use('/categorie', categorieRoutes);
 app.use('/famille', familleRoutes);
 
 app.use('/entetes', enteteRoutes);
-app.use('/lignes', ligneRoutes);
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
 })

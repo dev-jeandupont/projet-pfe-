@@ -1,20 +1,38 @@
 const express = require('express');
 const router = express.Router();
-const enteteController = require('../Controllers/enteteController');
+const enteteController = require('../Controllers/enteteController'); 
 
-// Route pour créer une nouvelle entête
-router.post('/creer', enteteController.createEntete);
+// Créer un devis
+router.post('/devis', enteteController.createDevis);
 
-// Route pour obtenir toutes les entêtes
-router.get('/', enteteController.getEntetes);
+// Consulter tous les devis
+router.get('/devis', enteteController.getDevis);
 
-// Route pour obtenir une entête spécifique par son ID
-router.get('/:id', enteteController.getEnteteById);
+// Transformer un devis en bon de commande
+router.post('/devis/:id/transform-to-bc', enteteController.transformDevisToBonCommande);
 
-// Route pour mettre à jour une entête spécifique
-router.put('/:id', enteteController.updateEntete);
+// Transformer un devis en bon de livraison
+router.post('/devis/:id/transform-to-bl', enteteController.transformDevisToBonLivraison);
 
-// Route pour supprimer une entête spécifique
-router.delete('/:id', enteteController.deleteEntete);
+// Transformer un bon de commande en facture
+router.post('/bc/:id/transform-to-facture', enteteController.transformBonCommandeToFacture);
+
+// Consulter toutes les factures
+router.get('/factures', enteteController.getFactures);
+
+// Consulter les documents par type (Devis, BC, BL, Facture)
+router.get('/documents', enteteController.getDocuments);
+
+// Créer un bon de commande manuellement
+router.post('/bc', enteteController.createBC);
+
+// Consulter tous les bons de commande
+router.get('/bc', enteteController.getBC);
+
+// Créer un bon de livraison manuellement
+router.post('/bl', enteteController.createBL);
+
+// Consulter tous les bons de livraison
+router.get('/bl', enteteController.getBL);
 
 module.exports = router;

@@ -7,7 +7,7 @@ import Box from "@mui/material/Box";
 import { Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 
-const DocumentForm = () => {
+const BonCommande = () => {
   const navigate = useNavigate();
   const [numero, setNumero] = useState("");
   const [date, setDate] = useState("");
@@ -18,8 +18,7 @@ const DocumentForm = () => {
   const [openModal, setOpenModal] = useState(false);
   const [numDocument, setNumDocument] = useState("");
   const [dateDocument, setDateDocument] = useState("");
-  const [type_achat, setType_achat] = useState("");
-  const [type_date, setType_date] = useState("");
+  const [typeDocument, setTypeDocument] = useState("");
   const [clientDetails, setClientDetails] = useState({
     code: "",
     adresse: "",
@@ -76,9 +75,7 @@ const DocumentForm = () => {
   };
 
   const supprimerLigne = (index) => {
-    console.log(index);
     if (index === 0) return;
-
     const nouvellesLignes = lignes.filter((i) => i !== index);
     setLignes(nouvellesLignes);
     calculerTotal(nouvellesLignes);
@@ -154,7 +151,7 @@ const DocumentForm = () => {
       alert("Veuillez remplir tous les champs");
       return;
     }
-  
+
     const updatedDocument = {
       numero: numDocument,
       date: dateDocument,
@@ -164,20 +161,11 @@ const DocumentForm = () => {
       totalTTC,
       lignes,
     };
-    console.log(numero);
-    // Appeler l'API pour transformer le devis en bon de commande
-    axios.post(`http://localhost:5000/entetes/devis/${numero}/transform-to-bc`, updatedDocument)
-      .then(response => {
-        console.log("Bon de commande généré :", response.data);
-        navigate(`/BonCommande/${response.data._id}`); // Rediriger vers la page du bon de commande
-      })
-      .catch(error => {
-        console.error("Erreur lors de la génération du bon de commande", error);
-        if (error.response) {
-          console.log("Détails de l'erreur :", error.response.data);
-        }
-      });
-  
+
+    axios.post("http://localhost:5000/entetes/devis/transform", updatedDocument)
+      .then(() => navigate(`/${typeDocument.toLowerCase()}s`))
+      .catch(error => console.error("Erreur lors de la génération du document", error));
+
     handleCloseModal();
   };
 
@@ -261,7 +249,7 @@ const DocumentForm = () => {
       <Box sx={{ display: "flex" }}>
         <Sidenav />
         <Box component="main" sx={{ flexGrow: 1, p: 3, paddingTop: "350px" }}>
-          <h1>Devis</h1>
+          <h1>Bon Commande</h1>
           <div className="document-form">
             <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
               <Box sx={{ flex: 1 }}>
@@ -423,7 +411,7 @@ const DocumentForm = () => {
               </DialogContent>
               <DialogActions>
                 <Button onClick={handleCloseModal} size="small">Annuler</Button>
-                <Button onClick={handleGeneration} color="primary" size="small">Générer</Button>
+                <Button onClick={handleGeneration} color="primary" size="small">Facturer</Button>
               </DialogActions>
             </Dialog>
           </div>
@@ -433,4 +421,4 @@ const DocumentForm = () => {
   );
 };
 
-export default DocumentForm;
+export default BonCommande;

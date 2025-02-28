@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { TextField, Button, Grid, Box } from "@mui/material";
+import { TextField, Button, Grid, Box, Typography } from "@mui/material";
 import Sidenav from "../components/Sidenav";
 import Navbar from "../components/Navbar";
 
 export default function CreateCategorieArticle() {
   const [formData, setFormData] = useState({
-    codeCategorie: "",
     designationCategorie: "",
   });
 
@@ -19,39 +18,41 @@ export default function CreateCategorieArticle() {
     }));
   };
 
-  // Crée une nouvelle famille d'articles
-  const createCategorieArticle = async () => {
+  // Crée une nouvelle catégorie d'articles
+  const createCategorieArticle = async (e) => {
+    e.preventDefault(); // Évite le rechargement de la page
+
     try {
       await axios.post("http://localhost:5000/categorie", formData);
-      alert("Categorie Article créée avec succès !");
+      alert("Catégorie d'article créée avec succès !");
       setFormData({
-        codeCategorie: "",
         designationCategorie: "",
       });
     } catch (error) {
-      console.error("Erreur lors de la création du Categorie Article :", error.response ? error.response.data : error);
-      alert("Une erreur s'est produite lors de la création du Categorie Article. Voir la console pour plus de détails.");
+      console.error(
+        "Erreur lors de la création de la catégorie :",
+        error.response ? error.response.data : error
+      );
+      alert(
+        "Une erreur s'est produite lors de la création. Voir la console pour plus de détails."
+      );
     }
   };
 
   return (
     <>
-      {/* Barre latérale */}
       <Navbar />
-
       <Box height={100} />
       <Box sx={{ display: "flex" }}>
-        {/* Sidenav */}
         <Sidenav />
 
-        {/* Contenu */}
         <Box
           component="main"
           sx={{
             flexGrow: 1,
             p: 3,
-            overflow: "auto", // Activer le scroll pour le contenu
-            maxHeight: "100vh", // Fixer une hauteur maximale pour le contenu principal
+            overflow: "auto",
+            maxHeight: "100vh",
           }}
         >
           <Box
@@ -64,42 +65,30 @@ export default function CreateCategorieArticle() {
               borderBottom: "1px solid #ddd",
             }}
           >
-            <h2>Créer une Categorie des Articles</h2>
+            <Typography variant="h5" gutterBottom>
+              Créer une Catégorie d'Articles
+            </Typography>
           </Box>
 
-          <form>
-            <Grid container spacing={3}>
+          <form onSubmit={createCategorieArticle}>
+            <Grid container spacing={2}>
               <Grid item xs={10}>
                 <TextField
                   name="designationCategorie"
-                  label="Designation de Categorie"
+                  label="Désignation de la Catégorie"
                   fullWidth
                   margin="normal"
                   value={formData.designationCategorie}
                   onChange={handleChange}
                 />
               </Grid>
+
+              <Grid item xs={10} sx={{ textAlign: "right" }}>
+                <Button type="submit" color="primary" variant="contained">
+                  Créer
+                </Button>
+              </Grid>
             </Grid>
-            <Grid container spacing={3}>
-              <Grid item xs={10}>
-                <TextField
-                  name="codeCategorie"
-                  label="codeCategorie"
-                  fullWidth
-                  margin="normal"
-                  value={formData.codeCategorie}
-                  onChange={handleChange}
-                />
-              </Grid>
-              </Grid>
-            <Button
-              onClick={createCategorieArticle}
-              color="primary"
-              variant="contained"
-              style={{ marginTop: "20px", float: "right" }}
-            >
-              Créer
-            </Button>
           </form>
         </Box>
       </Box>

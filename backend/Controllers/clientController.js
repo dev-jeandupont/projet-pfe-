@@ -8,8 +8,7 @@ exports.getAllClients = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Erreur serveur', error });
     }
-};
-
+}; 
 // Récupérer un client par ID
 exports.getClientById = async (req, res) => {
     try {
@@ -89,6 +88,20 @@ exports.getClients = async (req, res) => {
             totalPages: Math.ceil(count / limit),
             currentPage: page
         });
+    } catch (error) {
+        res.status(500).json({ message: 'Erreur serveur', error });
+    }
+};
+
+
+// Récupérer un client par son code
+exports.getClientByCode = async (req, res) => {
+    try {
+        const client = await Client.findOne({ code: req.params.code });
+        if (!client) {
+            return res.status(404).json({ message: 'Client non trouvé' });
+        }
+        res.status(200).json(client);
     } catch (error) {
         res.status(500).json({ message: 'Erreur serveur', error });
     }

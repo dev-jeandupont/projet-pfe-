@@ -17,12 +17,10 @@ import FamilleArticle from './pages/FamilleArticle'; // Assurez-vous que le chem
 import CreateFamilleArticle from './pages/createFamilleArticle'; 
 import CategorieArticle from './pages/CategorieArticle'; // Assurez-vous que le chemin est correct
 import CreateCategorieArticle from './pages/createCategorieArticle';
-import Facture from "./pages/Facture";
 import Devis from "./pages/Devis";
-import BonCommande from "./pages/BonCommande";
-import Bonlivraison from "./pages/Bonlivraison";
 import DetailsDocument from "./components/DetailsDocument";
 import DocumentForm from "./components/DocumentForm";
+import BonCommande from "./components/BonCommande";
 import './App.css';
 
 function App() {
@@ -71,13 +69,12 @@ function App() {
           <Route path="/categorieArticle" element={<CategorieArticle />} />
           <Route path="/categorieArticle/create" element={<CreateCategorieArticle />}/>
 
-          <Route path="/factures" element={<Facture />} />
+      
           <Route path="/devis" element={<Devis />} />
-          <Route path="/bons-commande" element={<BonCommande />} />
-          <Route path="/bons-livraison" element={<Bonlivraison/>} />
           <Route path="/documents/:id" element={<DetailsDocument />} />
           <Route path="/documents/modifier/:id" element={<DocumentForm />} />
           <Route path="/documents/nouveau" element={<DocumentForm />} />
+          <Route path="/BonCommande" element={<BonCommande/>} />
 
           {/* Routes publiques */}
           <Route path="/about" element={<About />} />

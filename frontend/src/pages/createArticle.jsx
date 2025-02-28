@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { TextField, Button,Input, Grid, Box, MenuItem, Checkbox, FormControlLabel, TextareaAutosize } from "@mui/material";
+import { TextField, Button, Input, Grid, Box, MenuItem, Checkbox, FormControlLabel, TextareaAutosize } from "@mui/material";
 import Sidenav from "../components/Sidenav";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 
 export default function CreateArticle() {
-    const [loggedInUser, setLoggedInUser] = useState('');
-  
+  const [loggedInUser, setLoggedInUser] = useState('');
+
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     libelle: "",
@@ -25,14 +25,14 @@ export default function CreateArticle() {
     gestion_configuration: "",
     configuration: "",
     serie: false,
-    series: [], 
+    series: [],
     lib_fournisseur: "",
     Nature: "",
     image_article: "",
     prixmin: "",
     prixmax: "",
-    user_Connectée: {loggedInUser}, 
-    action_user_connecté: "", 
+    user_Connectée: { loggedInUser },
+    action_user_connecté: "",
     date_modif: new Date().toISOString().split("T")[0], // Date actuelle
     prix_achat_initiale: "",
     tva_achat: "",
@@ -57,7 +57,7 @@ export default function CreateArticle() {
         const categoriesResponse = await axios.get("http://localhost:5000/categorie");
         setCategories(categoriesResponse.data);
 
-    
+
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }
@@ -72,9 +72,9 @@ export default function CreateArticle() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
-        }
-    )   
-);
+    }
+    )
+    );
   };
   const handleFileChange = (e) => {
     setFormData((prev) => ({
@@ -83,35 +83,35 @@ export default function CreateArticle() {
     }));
   };
 
- //create article 
- const createArticle = async () => {
-  try {
-    const formDataToSend = new FormData();
+  //create article 
+  const createArticle = async () => {
+    try {
+      const formDataToSend = new FormData();
 
-    // Ajouter les champs au FormData
-    Object.keys(formData).forEach((key) => {
-      if (key === "image_article" && formData[key]) {
-        formDataToSend.append(key, formData[key]); // Ajouter l'image
-      } else {
-        formDataToSend.append(key, formData[key]); // Ajouter les autres champs
-      }
-    });
+      // Ajouter les champs au FormData
+      Object.keys(formData).forEach((key) => {
+        if (key === "image_article" && formData[key]) {
+          formDataToSend.append(key, formData[key]); // Ajouter l'image
+        } else {
+          formDataToSend.append(key, formData[key]); // Ajouter les autres champs
+        }
+      });
 
-    //const user_Connectée = 
-    // Envoyer la requête avec FormData
-    const response = await axios.post("http://localhost:5000/articles", formDataToSend, {
-      headers: {
-        "Content-Type": "multipart/form-data", // Indiquer que c'est un formulaire multipart
-      },
-    });
+      //const user_Connectée = 
+      // Envoyer la requête avec FormData
+      const response = await axios.post("http://localhost:5000/articles", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Indiquer que c'est un formulaire multipart
+        },
+      });
 
-    alert("Article créé avec succès !");
-    navigate("/Articles");
-  } catch (error) {
-    console.error("Erreur lors de la création de l'article :", error.response ? error.response.data : error);
-    alert("Une erreur s'est produite lors de la création de l'article. Voir la console pour plus de détails.");
-  }
-};
+      alert("Article créé avec succès !");
+      navigate("/Articles");
+    } catch (error) {
+      console.error("Erreur lors de la création de l'article :", error.response ? error.response.data : error);
+      alert("Une erreur s'est produite lors de la création de l'article. Voir la console pour plus de détails.");
+    }
+  };
 
   return (
     <>
@@ -148,8 +148,8 @@ export default function CreateArticle() {
 
           <form>
             <Grid container spacing={3}>
-             
-             
+
+
               {/* Libelle Article */}
               <Grid item xs={4}>
                 <TextField
@@ -183,8 +183,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-                {/* prix_brut*/}
-                <Grid item xs={4}>
+              {/* prix_brut*/}
+              <Grid item xs={4}>
                 <TextField
                   name="prix_brut"
                   label="Prix Brut"
@@ -194,8 +194,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-               {/* remise*/}
-               <Grid item xs={4}>
+              {/* remise*/}
+              <Grid item xs={4}>
                 <TextField
                   name="remise"
                   label="Remise %"
@@ -205,8 +205,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-                {/* prix_net*/}
-                <Grid item xs={4}>
+              {/* prix_net*/}
+              <Grid item xs={4}>
                 <TextField
                   name="prix_net"
                   label="Prix NET"
@@ -227,8 +227,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-               {/* prixht*/}
-               <Grid item xs={4}>
+              {/* prixht*/}
+              <Grid item xs={4}>
                 <TextField
                   name="prixht"
                   label="Prix ht"
@@ -238,8 +238,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-               {/* prix_totale_concré*/}
-               <Grid item xs={4}>
+              {/* prix_totale_concré*/}
+              <Grid item xs={4}>
                 <TextField
                   name="prix_totale_concré"
                   label="Prix Totale Concré"
@@ -249,8 +249,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-                {/* gestion_configuration*/}
-                <Grid item xs={4}>
+              {/* gestion_configuration*/}
+              <Grid item xs={4}>
                 <TextField
                   name="gestion_configuration"
                   label="gestion_configuration "
@@ -328,8 +328,8 @@ export default function CreateArticle() {
                   type="number"
                 />
               </Grid>
-            {/* prixmin */}
-                <Grid item xs={4}>
+              {/* prixmin */}
+              <Grid item xs={4}>
                 <TextField
                   name="prixmin"
                   label="Prix Min"
@@ -350,8 +350,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-                {/* tva_achat */}
-                <Grid item xs={4}>
+              {/* tva_achat */}
+              <Grid item xs={4}>
                 <TextField
                   name="tva_achat"
                   label="Tva Achat"
@@ -373,8 +373,8 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-               {/* configuration*/}
-             <Grid item xs={4}>
+              {/* configuration*/}
+              <Grid item xs={4}>
                 <TextareaAutosize
                   name="configuration"
                   placeholder="Configuration"
@@ -385,8 +385,8 @@ export default function CreateArticle() {
                 />
               </Grid>
 
-               {/* movement_article */}
-               <Grid item xs={4}>
+              {/* movement_article */}
+              <Grid item xs={4}>
                 <TextField
                   name="movement_article"
                   label="Movement Article"
@@ -396,21 +396,21 @@ export default function CreateArticle() {
                   onChange={handleChange}
                 />
               </Grid>
-                  {/* Checkbox pour activer la série */}
+              {/* Checkbox pour activer la série */}
               <Grid item xs={12}>
-               <FormControlLabel
-                   control={
-                 <Checkbox
-                 name="serie"
-                 checked={formData.serie}
-                onChange={handleChange}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="serie"
+                      checked={formData.serie}
+                      onChange={handleChange}
+                    />
+                  }
+                  label="Série"
                 />
-                }
-               label="Série"
-                />
-             </Grid>
+              </Grid>
 
-     
+
 
               {/* Checkbox pour les dimensions */}
               <Grid item xs={12}>
@@ -461,34 +461,34 @@ export default function CreateArticle() {
                 </>
               )}
 
-              
+
               {/* Image */}
               <Grid item xs={4}>
-             <Button
+                <Button
                   variant="contained"
-                component="label"
-                color="primary"
-                 sx={{ textTransform: "none" }}
+                  component="label"
+                  color="primary"
+                  sx={{ textTransform: "none" }}
                 >
-              Choisir une image
-             <input
-              type="file"
-              hidden
-             accept="image/*"
-            onChange={handleFileChange}
-            />
-            </Button>
+                  Choisir une image
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={handleFileChange}
+                  />
+                </Button>
 
-         {formData.image_article && (
-         <Box mt={2}>
-          <img
-        src={URL.createObjectURL(formData.image_article)}
-        alt="Aperçu"
-        style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
-             />
-         </Box>
-            )}
-            </Grid>
+                {formData.image_article && (
+                  <Box mt={2}>
+                    <img
+                      src={URL.createObjectURL(formData.image_article)}
+                      alt="Aperçu"
+                      style={{ width: "100px", height: "100px", objectFit: "cover", borderRadius: "8px" }}
+                    />
+                  </Box>
+                )}
+              </Grid>
 
 
 

@@ -49,6 +49,7 @@ export default function CategorieArticle() {
   // Open delete confirmation dialog
   const handleOpenDialog = (id) => {
     setSelectedCategorieArticleId(id); // Set the fournisseur ID to be deleted
+    
     setOpenDialog(true); // Open dialog
   };
 

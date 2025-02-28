@@ -20,4 +20,7 @@ router.delete('/:id', clientController.deleteClient);
 // Récupérer des clients avec recherche et pagination
 router.get('/', clientController.getClients);
 
+// Récupérer un client par son code
+router.get('/code/:code', clientController.getClientByCode);
+
 module.exports = router;

@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 // Définition du schéma Article
 const ArticleSchema = new Schema({
     code: {
-        type: Number,
-        required: true,
+        type: String, // Changez le type en String
         unique: true
     },
     libelle: {
@@ -15,12 +14,12 @@ const ArticleSchema = new Schema({
     libelleFamille: {
         type: Schema.Types.ObjectId,
         ref: 'Famille',  // Correction du nom de référence
-        required: true,
+       // required: true,
     },
     libeleCategorie: {
         type: Schema.Types.ObjectId,
         ref: 'Categorie',  // Correction du nom de référence
-        required: true,
+       // required: true, 
     },
     Nombre_unite: {
         type: Number,
@@ -101,6 +100,24 @@ const ArticleSchema = new Schema({
     movement_article: {
         type: String,
     },
+});
+ArticleSchema.pre("save", async function (next) {
+    if (!this.code) { // Vérifiez si `this.code` est défini
+        const lastArticle = await mongoose.model("Article").findOne().sort({ code: -1 });
+        let lastNumber = 0;
+
+        if (lastArticle && lastArticle.code) {
+            // Extrait le numéro du dernier code (par exemple, "ART-0001" -> 1)
+            const lastCodeParts = lastArticle.code.split("-");
+            if (lastCodeParts.length > 1) {
+                lastNumber = parseInt(lastCodeParts[1]);
+            }
+        }
+
+        // Génère un nouveau code (par exemple, "ART-0002")
+        this.code = `ART-${String(lastNumber + 1).padStart(4, "0")}`;
+    }
+    next();
 });
 
 const Article = mongoose.model('Article', ArticleSchema);
