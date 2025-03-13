@@ -17,11 +17,21 @@ import FamilleArticle from './pages/FamilleArticle'; // Assurez-vous que le chem
 import CreateFamilleArticle from './pages/createFamilleArticle'; 
 import CategorieArticle from './pages/CategorieArticle'; // Assurez-vous que le chemin est correct
 import CreateCategorieArticle from './pages/createCategorieArticle';
+import BonCommandePage from './pages/BonCommande';
+
 import Devis from "./pages/Devis";
-import DetailsDocument from "./components/DetailsDocument";
 import DocumentForm from "./components/DocumentForm";
-import BonCommande from "./components/BonCommande";
+import BonCommande from "./pages/BonCommande";
+import DevisConsulter from "./pages/DevisConsulter";
+import BonCommandeConsulter from "./pages/BonCommandeConsulter";
+import BonLivraisonConsulter from "./pages/BonLivraisonConsulter";
+import BonCommandeForm from './pages/BonCommandeForm';
+import BonLivraisionForm from './pages/BonLivraisionForm';
+
+
+
 import './App.css';
+import BonLivraisonPage from './pages/BonLivraision';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,6 +61,7 @@ function App() {
         <Routes>
           {/* Route par défaut redirige vers /login si l'utilisateur n'est pas authentifié */}
           <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} />
+          <Route path="/bon-commande" element={<BonCommandePage />} />
 
           {/* Routes protégées */}
           <Route path="/home" element={<PrivateRoute element={<Home />} />} />
@@ -71,10 +82,16 @@ function App() {
 
       
           <Route path="/devis" element={<Devis />} />
-          <Route path="/documents/:id" element={<DetailsDocument />} />
           <Route path="/documents/modifier/:id" element={<DocumentForm />} />
           <Route path="/documents/nouveau" element={<DocumentForm />} />
           <Route path="/BonCommande" element={<BonCommande/>} />
+          <Route path="/bon-livraison" element={<BonLivraisonPage/>} />
+          <Route path="/devis-consulter" element={<DevisConsulter />} />
+          <Route path="/Bon Commande-consulter" element={<BonCommandeConsulter />} />
+          <Route path="/Bon livraison-consulter" element={<BonLivraisonConsulter />} />
+          <Route path="/devis/ajouter" element={<Devis />} />
+          <Route path="/Bon Commande/ajouter" element={<BonCommandeForm />} />
+          <Route path="/Bon livraison/ajouter" element={<BonLivraisionForm />} />
 
           {/* Routes publiques */}
           <Route path="/about" element={<About />} />
