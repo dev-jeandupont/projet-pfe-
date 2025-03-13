@@ -15,11 +15,8 @@ const ClientForm = () => {
     adresse: '',
     register_commerce: '',
     solde_initial: 0,
-    montant_raprochement: 0,
-    code_rapprochement: '',
     rapeBl: '',
     solde_initiale_bl: 0,
-    montant_reglement_bl: 0,
     taux_retenu: 0,
 
   });

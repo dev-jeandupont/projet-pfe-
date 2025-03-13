@@ -293,6 +293,54 @@ export default function Sidenav() {
             </ListItemButton>
           </ListItem>
 
+
+{/* Devis */}
+<ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/devis-consulter")}>
+  <ListItemButton
+    sx={{
+      minHeight: 48,
+      justifyContent: drawerOpen ? "initial" : "center",
+      px: 2.5,
+    }}
+  >
+    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
+      <DescriptionIcon />
+    </ListItemIcon>
+    <ListItemText primary={"Devis"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+  </ListItemButton>
+</ListItem>
+
+{/* Bons de commande */}
+<ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/Bon Commande-consulter")}>
+  <ListItemButton
+    sx={{
+      minHeight: 48,
+      justifyContent: drawerOpen ? "initial" : "center",
+      px: 2.5,
+    }}
+  >
+    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
+      <ShoppingCartIcon />
+    </ListItemIcon>
+    <ListItemText primary={"Bons de Commande"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+  </ListItemButton>
+</ListItem>
+
+{/* Bons de livraison */}
+<ListItem  disablePadding sx={{ display: "block" }} onClick={() => navigate("/Bon livraison-consulter")}>
+  <ListItemButton
+    sx={{
+      minHeight: 48,
+      justifyContent: drawerOpen ? "initial" : "center",
+      px: 2.5,
+    }}
+  >
+    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
+      <LocalShippingIcon />
+    </ListItemIcon>
+    <ListItemText primary={"Bons de Livraison"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
+  </ListItemButton>
+</ListItem>
 {/* Factures */}
 <ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/factures")}>
   <ListItemButton
@@ -309,53 +357,6 @@ export default function Sidenav() {
   </ListItemButton>
 </ListItem>
 
-{/* Devis */}
-<ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/devis")}>
-  <ListItemButton
-    sx={{
-      minHeight: 48,
-      justifyContent: drawerOpen ? "initial" : "center",
-      px: 2.5,
-    }}
-  >
-    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
-      <DescriptionIcon />
-    </ListItemIcon>
-    <ListItemText primary={"Devis"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
-  </ListItemButton>
-</ListItem>
-
-{/* Bons de commande */}
-<ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/bons-commande")}>
-  <ListItemButton
-    sx={{
-      minHeight: 48,
-      justifyContent: drawerOpen ? "initial" : "center",
-      px: 2.5,
-    }}
-  >
-    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
-      <ShoppingCartIcon />
-    </ListItemIcon>
-    <ListItemText primary={"Bons de Commande"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
-  </ListItemButton>
-</ListItem>
-
-{/* Bons de livraison */}
-<ListItem disablePadding sx={{ display: "block" }} onClick={() => navigate("/bons-livraison")}>
-  <ListItemButton
-    sx={{
-      minHeight: 48,
-      justifyContent: drawerOpen ? "initial" : "center",
-      px: 2.5,
-    }}
-  >
-    <ListItemIcon sx={{ minWidth: 0, mr: drawerOpen ? 3 : "auto", justifyContent: "center" }}>
-      <LocalShippingIcon />
-    </ListItemIcon>
-    <ListItemText primary={"Bons de Livraison"} sx={{ opacity: drawerOpen ? 1 : 0 }} />
-  </ListItemButton>
-</ListItem>
 
         </List>
         <Divider />

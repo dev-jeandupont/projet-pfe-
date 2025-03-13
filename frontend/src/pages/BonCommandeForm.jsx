@@ -2,7 +2,7 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import DocumentForm from "../components/DocumentForm";
 
-export default function Devis() {
+export default function BonCommandeForm() {
   return (
     <>
       <Navbar />
@@ -10,7 +10,7 @@ export default function Devis() {
          
         
             {/* Afficher directement le formulaire sans bouton */}
-            <DocumentForm typeDocument="Devis" />
+            <DocumentForm typeDocument="Bon Commande" />
          
     </>
   );

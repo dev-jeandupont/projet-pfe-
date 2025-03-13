@@ -8,6 +8,7 @@ const categorieRoutes = require("./Routes/categorieRoutes");
 const familleRoutes = require("./Routes/familleRoutes");
 const articleRoutes = require("./Routes/articleRoutes");
 const enteteRoutes = require('./Routes/enteteRoutes');
+const  eventRoute = require("./Routes/EventRoute");
 require('dotenv').config();
 require('./Models/db');
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use('/categorie', categorieRoutes);
 app.use('/famille', familleRoutes);
 
 app.use('/entetes', enteteRoutes);
+app.use('/api/events', eventRoute);
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
 })

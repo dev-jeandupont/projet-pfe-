@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 
 const enteteSchema = new mongoose.Schema({
+    typeDocument: { type: String, required: false },
     numero: { type: String, required: true, unique: true },
     date: { type: Date, required: true },
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
