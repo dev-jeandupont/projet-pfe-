@@ -7,12 +7,15 @@ import { Button, TextField } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // Import explicite d'autoTable
+import axios from "axios";
 
 const BonCommandePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const {
+    typeDocument,
+    id,
     numero,
     date,
     client,
@@ -26,6 +29,11 @@ const BonCommandePage = () => {
   } = location.state;
 
   const genererFacture = () => {
+    const data = {
+      typeDocument,
+      id,
+      numero,
+    };
     // Créer un nouveau document PDF
     const doc = new jsPDF();
 
@@ -95,11 +103,37 @@ const BonCommandePage = () => {
 
     // Ajouter les totaux
     doc.setFontSize(12);
-    doc.text(`Total HT: ${totalHT.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 10);
-    doc.text(`Total TTC: ${totalTTC.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 20);
+    doc.text(
+      `Total HT: ${totalHT.toFixed(2)}`,
+      15,
+      doc.lastAutoTable.finalY + 10
+    );
+    doc.text(
+      `Total TTC: ${totalTTC.toFixed(2)}`,
+      15,
+      doc.lastAutoTable.finalY + 20
+    );
 
     // Sauvegarder le PDF
     doc.save(`Facture_${numero}.pdf`);
+    console.log(data);
+    axios
+      .put("http://localhost:5000/entetes/devis", data)
+      .then((response) => {
+        console.log(response);
+        if (response.status === 200) {
+          alert("Facture générée avec succès");
+          navigate("/Bon%20Commande-consulter");
+        } else {
+          alert("Erreur lors de la génération de la facture");
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur Axios :", error);
+        if (error.response) {
+          console.log("Détails de l'erreur :", error.response.data);
+        }
+      });
   };
 
   const handleCancel = () => {
@@ -115,19 +149,63 @@ const BonCommandePage = () => {
         <Box component="main" sx={{ flexGrow: 1, p: 3, paddingTop: "350px" }}>
           <h1>Bon de Commande</h1>
           <div className="document-form">
-            <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
+            >
               <Box sx={{ flex: 1 }}>
                 <h3>Client</h3>
-                <TextField label="Code" fullWidth margin="normal" value={client.code} size="small" disabled />
-                <TextField label="Adresse" fullWidth margin="normal" value={client.adresse} size="small" disabled />
-                <TextField label="Matricule" fullWidth margin="normal" value={client.matricule} size="small" disabled />
-                <TextField label="Raison Sociale" fullWidth margin="normal" value={client.raisonSociale} size="small" disabled />
-                <TextField label="Téléphone" fullWidth margin="normal" value={client.telephone} size="small" disabled />
+                <TextField
+                  label="Code"
+                  fullWidth
+                  margin="normal"
+                  value={client.code}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Adresse"
+                  fullWidth
+                  margin="normal"
+                  value={client.adresse}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Matricule"
+                  fullWidth
+                  margin="normal"
+                  value={client.matricule}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Raison Sociale"
+                  fullWidth
+                  margin="normal"
+                  value={client.raisonSociale}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Téléphone"
+                  fullWidth
+                  margin="normal"
+                  value={client.telephone}
+                  size="small"
+                  disabled
+                />
               </Box>
 
               <Box sx={{ flex: 1 }}>
                 <h3>Général</h3>
-                <TextField label="Numéro" fullWidth margin="normal" value={numero} size="small" disabled />
+                <TextField
+                  label="Numéro"
+                  fullWidth
+                  margin="normal"
+                  value={numero}
+                  size="small"
+                  disabled
+                />
                 <TextField
                   label="Date"
                   type="date"
@@ -138,9 +216,30 @@ const BonCommandePage = () => {
                   size="small"
                   disabled
                 />
-                <TextField label="Réf. BCC" fullWidth margin="normal" value={refBCC} size="small" disabled />
-                <TextField label="Point de Vente" fullWidth margin="normal" value={pointDeVente} size="small" disabled />
-                <TextField label="Type de Paiement" fullWidth margin="normal" value={typePaiement} size="small" disabled />
+                <TextField
+                  label="Réf. BCC"
+                  fullWidth
+                  margin="normal"
+                  value={refBCC}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Point de Vente"
+                  fullWidth
+                  margin="normal"
+                  value={pointDeVente}
+                  size="small"
+                  disabled
+                />
+                <TextField
+                  label="Type de Paiement"
+                  fullWidth
+                  margin="normal"
+                  value={typePaiement}
+                  size="small"
+                  disabled
+                />
                 <TextField
                   label="Commentaire"
                   fullWidth
@@ -158,29 +257,65 @@ const BonCommandePage = () => {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>N°</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Code Article</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Famille</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Libelle Article</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Quantité</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Prix HT</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Remise</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>TVA</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Prix TTC</th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    N°
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Code Article
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Famille
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Libelle Article
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Quantité
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Prix HT
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Remise
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    TVA
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Prix TTC
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {lignes.map((ligne, index) => (
                   <tr key={index}>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{index + 1}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.codeArticle}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.famille}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.libelleArticle}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.quantite}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.prixHT}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.remise}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.tva}</td>
-                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>{ligne.prixTTC.toFixed(2)}</td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {index + 1}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.codeArticle}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.famille}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.libelleArticle}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.quantite}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.prixHT}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.remise}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.tva}
+                    </td>
+                    <td style={{ padding: "5px", border: "1px solid #ccc" }}>
+                      {ligne.prixTTC.toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -199,7 +334,12 @@ const BonCommandePage = () => {
             >
               Générer Facture
             </Button>
-            <Button variant="contained" color="primary" size="small" onClick={handleCancel}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={handleCancel}
+            >
               Annuler
             </Button>
           </div>

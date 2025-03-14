@@ -4,8 +4,20 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidenav from "../components/Sidenav";
 import Box from "@mui/material/Box";
-import { Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
-import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 
 const DocumentForm = ({ typeDocument }) => {
   const navigate = useNavigate();
@@ -18,7 +30,7 @@ const DocumentForm = ({ typeDocument }) => {
   const [openModal, setOpenModal] = useState(false);
   const [type_achat, setType_achat] = useState(typeDocument);
   const [enregistrementReussi, setEnregistrementReussi] = useState(false);
-
+  const [id, setId] = useState();
   // Ajout des nouveaux champs
   const [refBCC, setRefBCC] = useState("");
   const [pointDeVente, setPointDeVente] = useState("");
@@ -47,12 +59,15 @@ const DocumentForm = ({ typeDocument }) => {
   ]);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/famille")
-      .then(response => {
+    axios
+      .get("http://localhost:5000/famille")
+      .then((response) => {
         console.log("Familles récupérées :", response.data);
         setFamilles(response.data);
       })
-      .catch(error => console.error("Erreur de chargement des familles", error));
+      .catch((error) =>
+        console.error("Erreur de chargement des familles", error)
+      );
   }, []);
 
   useEffect(() => {
@@ -119,7 +134,11 @@ const DocumentForm = ({ typeDocument }) => {
   };
 
   const calculerTotal = (lignes) => {
-    const totalHT = lignes.reduce((acc, ligne) => acc + (ligne.prixHT * ligne.quantite * (1 - ligne.remise / 100)), 0);
+    const totalHT = lignes.reduce(
+      (acc, ligne) =>
+        acc + ligne.prixHT * ligne.quantite * (1 - ligne.remise / 100),
+      0
+    );
     const totalTTC = totalHT * (1 + lignes[0]?.tva / 100);
     setTotalHT(totalHT);
     setTotalTTC(totalTTC);
@@ -140,12 +159,13 @@ const DocumentForm = ({ typeDocument }) => {
       commentaire,
     };
 
-    axios.post("http://localhost:5000/entetes/devis", documentData)
-      .then(response => {
-        console.log("Succès :", response.data);
+    axios
+      .post("http://localhost:5000/entetes/devis", documentData)
+      .then((response) => {
+        setId(response.data._id);
         setEnregistrementReussi(true);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erreur Axios :", error);
         if (error.response) {
           console.log("Détails de l'erreur :", error.response.data);
@@ -172,7 +192,11 @@ const DocumentForm = ({ typeDocument }) => {
   const handleGeneration = (typeDocumentChoisi) => {
     const documentData = {
       typeDocument: typeDocumentChoisi,
-      numero: typeDocumentChoisi === "Bon Commande" ? numero.replace(/^DV/, "BC") : numero.replace(/^DV/, "BL"),
+      id,
+      numero:
+        typeDocumentChoisi === "Bon Commande"
+          ? numero.replace(/^DV/, "BC")
+          : numero.replace(/^DV/, "BL"),
       date,
       client: clientDetails,
       totalHT,
@@ -183,10 +207,10 @@ const DocumentForm = ({ typeDocument }) => {
       typePaiement,
       commentaire,
     };
-
+    console.log(documentData);
     if (typeDocumentChoisi === "Bon Commande") {
       navigate("/bon-commande", { state: documentData });
-    } else if (typeDocumentChoisi === "Bon de Livraison") {
+    } else if (typeDocumentChoisi === "Bon Livraison") {
       navigate("/bon-livraison", { state: documentData });
     }
 
@@ -194,8 +218,9 @@ const DocumentForm = ({ typeDocument }) => {
   };
 
   const fetchClientByCode = (code) => {
-    axios.get(`http://localhost:5000/clients/code/${code}`)
-      .then(response => {
+    axios
+      .get(`http://localhost:5000/clients/code/${code}`)
+      .then((response) => {
         const client = response.data;
         setClientDetails({
           code: client.code,
@@ -206,7 +231,7 @@ const DocumentForm = ({ typeDocument }) => {
         });
         setClient(client._id);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erreur de chargement des détails du client", error);
         setClientDetails({
           code: code,
@@ -220,11 +245,13 @@ const DocumentForm = ({ typeDocument }) => {
   };
 
   const fetchArticleByCode = (code, index) => {
-    axios.get(`http://localhost:5000/articles/code/${code}`)
-      .then(response => {
+    axios
+      .get(`http://localhost:5000/articles/code/${code}`)
+      .then((response) => {
         const article = response.data;
-        axios.get(`http://localhost:5000/famille/${article.libelleFamille}`)
-          .then(familleResponse => {
+        axios
+          .get(`http://localhost:5000/famille/${article.libelleFamille}`)
+          .then((familleResponse) => {
             const famille = familleResponse.data;
             const nouvellesLignes = [...lignes];
             nouvellesLignes[index] = {
@@ -233,14 +260,23 @@ const DocumentForm = ({ typeDocument }) => {
               prixHT: article.prix_brut,
               tva: article.tva,
               famille: famille.designationFamille,
-              prixTTC: calculerPrixTTC(article.prix_brut, nouvellesLignes[index].remise, article.tva),
+              prixTTC: calculerPrixTTC(
+                article.prix_brut,
+                nouvellesLignes[index].remise,
+                article.tva
+              ),
             };
             setLignes(nouvellesLignes);
             calculerTotal(nouvellesLignes);
           })
-          .catch(error => console.error("Erreur de chargement des détails de la famille", error));
+          .catch((error) =>
+            console.error(
+              "Erreur de chargement des détails de la famille",
+              error
+            )
+          );
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erreur de chargement des détails de l'article", error);
         const nouvellesLignes = [...lignes];
         nouvellesLignes[index] = {
@@ -265,7 +301,9 @@ const DocumentForm = ({ typeDocument }) => {
         <Box component="main" sx={{ flexGrow: 1, p: 3, paddingTop: "350px" }}>
           <h1>{typeDocument}</h1>
           <div className="document-form">
-            <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
+            >
               <Box sx={{ flex: 1 }}>
                 <h3>Client</h3>
                 <TextField
@@ -282,20 +320,89 @@ const DocumentForm = ({ typeDocument }) => {
                     }
                   }}
                 />
-                <TextField label="Adresse" fullWidth margin="normal" size="small" value={clientDetails.adresse} />
-                <TextField label="Matricule" fullWidth margin="normal" size="small" value={clientDetails.matricule} />
-                <TextField label="Raison Sociale" fullWidth margin="normal" size="small" value={clientDetails.raisonSociale} />
-                <TextField label="Téléphone" fullWidth margin="normal" size="small" value={clientDetails.telephone} />
+                <TextField
+                  label="Adresse"
+                  fullWidth
+                  margin="normal"
+                  size="small"
+                  value={clientDetails.adresse}
+                />
+                <TextField
+                  label="Matricule"
+                  fullWidth
+                  margin="normal"
+                  size="small"
+                  value={clientDetails.matricule}
+                />
+                <TextField
+                  label="Raison Sociale"
+                  fullWidth
+                  margin="normal"
+                  size="small"
+                  value={clientDetails.raisonSociale}
+                />
+                <TextField
+                  label="Téléphone"
+                  fullWidth
+                  margin="normal"
+                  size="small"
+                  value={clientDetails.telephone}
+                />
               </Box>
 
               <Box sx={{ flex: 1 }}>
                 <h3>Général</h3>
-                <TextField label="Numéro" fullWidth margin="normal" value={numero} size="small" />
-                <TextField label="Date" type="date" fullWidth margin="normal" value={date} onChange={(e) => setDate(e.target.value)} InputLabelProps={{ shrink: true }} size="small" />
-                <TextField label="Réf. BCC" fullWidth margin="normal" value={refBCC} onChange={(e) => setRefBCC(e.target.value)} size="small" />
-                <TextField label="Point de Vente" fullWidth margin="normal" value={pointDeVente} onChange={(e) => setPointDeVente(e.target.value)} size="small" />
-                <TextField label="Type de Paiement" fullWidth margin="normal" value={typePaiement} onChange={(e) => setTypePaiement(e.target.value)} size="small" />
-                <TextField label="Commentaire" fullWidth margin="normal" value={commentaire} onChange={(e) => setCommentaire(e.target.value)} multiline rows={4} size="small" />
+                <TextField
+                  label="Numéro"
+                  fullWidth
+                  margin="normal"
+                  value={numero}
+                  size="small"
+                />
+                <TextField
+                  label="Date"
+                  type="date"
+                  fullWidth
+                  margin="normal"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  size="small"
+                />
+                <TextField
+                  label="Réf. BCC"
+                  fullWidth
+                  margin="normal"
+                  value={refBCC}
+                  onChange={(e) => setRefBCC(e.target.value)}
+                  size="small"
+                />
+                <TextField
+                  label="Point de Vente"
+                  fullWidth
+                  margin="normal"
+                  value={pointDeVente}
+                  onChange={(e) => setPointDeVente(e.target.value)}
+                  size="small"
+                />
+                <TextField
+                  label="Type de Paiement"
+                  fullWidth
+                  margin="normal"
+                  value={typePaiement}
+                  onChange={(e) => setTypePaiement(e.target.value)}
+                  size="small"
+                />
+                <TextField
+                  label="Commentaire"
+                  fullWidth
+                  margin="normal"
+                  value={commentaire}
+                  onChange={(e) => setCommentaire(e.target.value)}
+                  multiline
+                  rows={4}
+                  size="small"
+                />
               </Box>
             </Box>
 
@@ -303,16 +410,36 @@ const DocumentForm = ({ typeDocument }) => {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>N°</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Code Article</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Famille</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Libelle Article</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Quantité</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Prix HT</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Remise</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>TVA</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Prix TTC</th>
-                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>Actions</th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    N°
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Code Article
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Famille
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Libelle Article
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Quantité
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Prix HT
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Remise
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    TVA
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Prix TTC
+                  </th>
+                  <th style={{ padding: "5px", border: "1px solid #ccc" }}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -322,12 +449,14 @@ const DocumentForm = ({ typeDocument }) => {
                     <td>
                       <TextField
                         value={ligne.codeArticle}
-                        onChange={(e) => mettreAJourLigne(index, "codeArticle", e.target.value)}
+                        onChange={(e) =>
+                          mettreAJourLigne(index, "codeArticle", e.target.value)
+                        }
                         size="small"
                       />
                     </td>
                     <td>
-                      <TextField value={ligne.famille || ''} size="small" />
+                      <TextField value={ligne.famille || ""} size="small" />
                     </td>
                     <td>
                       <TextField value={ligne.libelleArticle} size="small" />
@@ -336,7 +465,9 @@ const DocumentForm = ({ typeDocument }) => {
                       <TextField
                         type="number"
                         value={ligne.quantite}
-                        onChange={(e) => mettreAJourLigne(index, "quantite", e.target.value)}
+                        onChange={(e) =>
+                          mettreAJourLigne(index, "quantite", e.target.value)
+                        }
                         size="small"
                       />
                     </td>
@@ -347,7 +478,9 @@ const DocumentForm = ({ typeDocument }) => {
                       <TextField
                         type="number"
                         value={ligne.remise}
-                        onChange={(e) => mettreAJourLigne(index, "remise", e.target.value)}
+                        onChange={(e) =>
+                          mettreAJourLigne(index, "remise", e.target.value)
+                        }
                         size="small"
                       />
                     </td>
@@ -355,24 +488,55 @@ const DocumentForm = ({ typeDocument }) => {
                       <TextField value={ligne.tva} size="small" />
                     </td>
                     <td>
-                      <TextField value={ligne.prixTTC.toFixed(2)} size="small" />
+                      <TextField
+                        value={ligne.prixTTC.toFixed(2)}
+                        size="small"
+                      />
                     </td>
                     <td>
-                      <Button onClick={() => supprimerLigne(index)} size="small">Supprimer</Button>
+                      <Button
+                        onClick={() => supprimerLigne(index)}
+                        size="small"
+                      >
+                        Supprimer
+                      </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <Button variant="contained" onClick={ajouterLigne} size="small">Ajouter une ligne</Button>
+            <Button variant="contained" onClick={ajouterLigne} size="small">
+              Ajouter une ligne
+            </Button>
 
             <h3>Total HT : {totalHT.toFixed(2)}</h3>
             <h3>Total TTC : {totalTTC.toFixed(2)}</h3>
 
-            <Button variant="contained" color="primary" onClick={enregistrerDocument} size="small">Enregistrer</Button>
-            <Button variant="contained" color="primary" onClick={ouvrirFenetreGeneration} size="small">Générer</Button>
-            <Button variant="contained" color="primary" onClick={handleCancel} size="small">Annuler</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={enregistrerDocument}
+              size="small"
+            >
+              Enregistrer
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={ouvrirFenetreGeneration}
+              size="small"
+            >
+              Générer
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCancel}
+              size="small"
+            >
+              Annuler
+            </Button>
 
             <Dialog open={openModal} onClose={handleCloseModal}>
               <DialogTitle>Choisir le type de document</DialogTitle>
@@ -385,13 +549,21 @@ const DocumentForm = ({ typeDocument }) => {
                     size="small"
                   >
                     <MenuItem value="Bon Commande">Bon de Commande</MenuItem>
-                    <MenuItem value="Bon de Livraison">Bon de Livraison</MenuItem>
+                    <MenuItem value="Bon Livraison">Bon de Livraison</MenuItem>
                   </Select>
                 </FormControl>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleCloseModal} size="small">Annuler</Button>
-                <Button onClick={() => handleGeneration(type_achat)} color="primary" size="small">Générer</Button>
+                <Button onClick={handleCloseModal} size="small">
+                  Annuler
+                </Button>
+                <Button
+                  onClick={() => handleGeneration(type_achat)}
+                  color="primary"
+                  size="small"
+                >
+                  Générer
+                </Button>
               </DialogActions>
             </Dialog>
           </div>
