@@ -102,7 +102,7 @@ const createArticle = async (req, res) => {
             movement_article,
         });
 
-        console.log("Article créé avec succès :", newArticle);
+       
         res.status(201).json(newArticle);
     } catch (error) {
         console.error("Erreur lors de la création du Article :", error);
@@ -221,9 +221,9 @@ const updateArticle = async (req, res) => {
 // Récupérer un article par son code
 const getArticleByCode = async (req, res) => {
     try {
-        console.log("backend =",req.params.code);
+      
         const article = await Article.findOne({ code: req.params.code });
-        console.log("article =", article);
+        
         if (!article) {
             return res.status(404).json({ message: 'Article non trouvé' });
         }

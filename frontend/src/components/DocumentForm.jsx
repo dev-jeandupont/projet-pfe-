@@ -6,6 +6,9 @@ import Sidenav from "../components/Sidenav";
 import Box from "@mui/material/Box";
 import { Button, TextField, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable"; 
+import Swal from "sweetalert2"; // Pour les alertes
 
 const DocumentForm = ({ typeDocument }) => {
   const navigate = useNavigate();
@@ -63,8 +66,6 @@ const DocumentForm = ({ typeDocument }) => {
     if (date) {
       const today = new Date(date);
       const year = today.getFullYear().toString().slice(-2);
-      const month = (today.getMonth() + 1).toString().padStart(2, "0");
-      const day = today.getDate().toString().padStart(2, "0");
       let entete = null;
       if (type_achat === "Devis") {
         entete = "DV";
@@ -73,10 +74,108 @@ const DocumentForm = ({ typeDocument }) => {
       } else {
         entete = "BL";
       }
-      setNumero(`${entete}${year}${month}${day}0001`);
+      setNumero(`${entete}01${year}0001`);
     }
   };
 
+  const genererFacture = () => {
+    // Vérifier si les champs obligatoires sont vides
+    if (
+      !numero ||
+      !date ||
+      !client?.raisonSociale ||
+      !refBCC ||
+      !pointDeVente ||
+      !typePaiement ||
+      !totalHT ||
+      !totalTTC ||
+      !lignes ||
+      lignes.length === 0
+    ) {
+      // Afficher une alerte si un champ obligatoire est vide
+      Swal.fire({
+        icon: "error",
+        title: "Champs obligatoires manquants",
+        text: "Veuillez remplir tous les champs obligatoires avant de générer la facture.",
+      });
+      return; // Arrêter l'exécution de la fonction
+    }
+  
+    // Créer un nouveau document PDF
+    const doc = new jsPDF();
+  
+    // Ajouter le titre
+    doc.setFontSize(18);
+    doc.setTextColor(33, 150, 243); // Couleur bleue
+    doc.text("Facture", 15, 20);
+  
+    // Informations générales
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0); // Couleur noire
+    doc.text(`Numéro: ${numero}`, 15, 30);
+    doc.text(`Date: ${date}`, 15, 40);
+    doc.text(`Client: ${client.raisonSociale}`, 15, 50);
+    doc.text(`Réf. BCC: ${refBCC}`, 15, 60);
+    doc.text(`Point de Vente: ${pointDeVente}`, 15, 70);
+    doc.text(`Type de Paiement: ${typePaiement}`, 15, 80);
+    doc.text(`Commentaire: ${commentaire}`, 15, 90);
+  
+    // Préparer les données du tableau
+    const tableData = lignes.map((ligne, index) => [
+      index + 1,
+      ligne.codeArticle,
+      ligne.famille,
+      ligne.libelleArticle,
+      ligne.quantite,
+      ligne.prixHT.toFixed(2),
+      ligne.remise.toFixed(2),
+      ligne.tva.toFixed(2),
+      ligne.prixTTC.toFixed(2),
+    ]);
+  
+    // En-têtes du tableau
+    const headers = [
+      "N°",
+      "Code Article",
+      "Famille",
+      "Libellé Article",
+      "Quantité",
+      "Prix HT",
+      "Remise",
+      "TVA",
+      "Prix TTC",
+    ];
+  
+    // Ajouter le tableau avec jspdf-autotable
+    autoTable(doc, {
+      startY: 100, // Position verticale du tableau
+      head: [headers],
+      body: tableData,
+      theme: "striped", // Thème du tableau
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        textColor: [0, 0, 0], // Couleur du texte
+        fillColor: [255, 255, 255], // Couleur de fond
+      },
+      headStyles: {
+        fillColor: [33, 150, 243], // Couleur de fond de l'en-tête
+        textColor: [255, 255, 255], // Couleur du texte de l'en-tête
+        fontStyle: "bold", // Texte en gras
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245], // Couleur de fond des lignes alternées
+      },
+    });
+  
+    // Ajouter les totaux
+    doc.setFontSize(12);
+    doc.text(`Total HT: ${totalHT.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 10);
+    doc.text(`Total TTC: ${totalTTC.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 20);
+  
+    // Sauvegarder le PDF
+    doc.save(`Facture_${numero}.pdf`);
+  };
   const ajouterLigne = () => {
     const nouvelleLigne = {
       quantite: 1,
@@ -371,7 +470,21 @@ const DocumentForm = ({ typeDocument }) => {
             <h3>Total TTC : {totalTTC.toFixed(2)}</h3>
 
             <Button variant="contained" color="primary" onClick={enregistrerDocument} size="small">Enregistrer</Button>
-            <Button variant="contained" color="primary" onClick={ouvrirFenetreGeneration} size="small">Générer</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                if (typeDocument !== "Devis") {
+                  genererFacture(); // Directly generate the invoice
+                } else {
+                  ouvrirFenetreGeneration(); // Open the dialog
+                }
+              }}
+              size="small"
+            >
+              Générer
+            </Button>
+
             <Button variant="contained" color="primary" onClick={handleCancel} size="small">Annuler</Button>
 
             <Dialog open={openModal} onClose={handleCloseModal}>
@@ -396,7 +509,7 @@ const DocumentForm = ({ typeDocument }) => {
             </Dialog>
           </div>
         </Box>
-      </Box>
+      </Box >
     </>
   );
 };

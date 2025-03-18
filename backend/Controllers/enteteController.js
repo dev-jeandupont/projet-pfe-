@@ -5,8 +5,8 @@ const fs = require('fs');
 
 // Modifier la méthode create pour générer automatiquement le numéro
 exports.create = async (req, res) => {
-  const { client, referenceCommande, pointVente, typePaiement, commentaire, totalHT, totalTTC, lignes, typeDocument,numero,date } = req.body;
-
+  const { client, refBCC, pointDeVente, typePaiement, commentaire, totalHT, totalTTC, lignes, typeDocument,numero,date } = req.body;
+//console.log(req.body)
   try {
 
     // Créer l'entête
@@ -14,13 +14,13 @@ exports.create = async (req, res) => {
       typeDocument: typeDocument,
       numero: numero,
       date: date,
-      client,
-      referenceCommande,
-      pointVente,
-      typePaiement,
-      commentaire,
-      totalHT,
-      totalTTC,
+      client :client,
+      referenceCommande :refBCC,
+      pointVente :pointDeVente,
+      typePaiement: typePaiement,
+      commentaire : commentaire,
+      totalHT: totalHT,
+      totalTTC : totalTTC,
     });
 
     const savedEntete = await entete.save();
@@ -42,7 +42,7 @@ exports.create = async (req, res) => {
 
     savedEntete.lignes = savedLignes.map(ligne => ligne._id);
     await savedEntete.save();
-
+   console.log(savedEntete)
     res.status(201).json(savedEntete);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -54,8 +54,7 @@ exports.getDocuments = async (req, res) => {
     const { type } = req.query; 
     try {
         const documents = await Entete.find({ typeDocument: type }).populate('client').populate('lignes');
-        console.log(documents)
-       
+        
         res.status(200).json(documents);
     } catch (error) {
         res.status(400).json({ message: error.message });

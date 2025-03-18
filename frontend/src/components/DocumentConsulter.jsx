@@ -4,43 +4,68 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidenav from "../components/Sidenav";
 import Box from "@mui/material/Box";
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, TextField, InputAdornment } from "@mui/material";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Info as InfoIcon } from '@mui/icons-material';
+import { Info as InfoIcon } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search"; // Icône pour le filtre
+import SearchIcon from "@mui/icons-material/Search";
 import Swal from "sweetalert2";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Icône Précédent
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"; // Icône Suivant
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const DocumentConsulter = ({ typeDocument }) => {
   const [documents, setDocuments] = useState([]);
-  const [filteredDocuments, setFilteredDocuments] = useState([]); // Documents filtrés
-  const [searchTerm, setSearchTerm] = useState(""); // Terme de recherche
-  const [currentPage, setCurrentPage] = useState(1); // Page actuelle
+  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [typeDocumentChoisi, setTypeDocumentChoisi] = useState("Bon Commande");
   const navigate = useNavigate();
 
-  const itemsPerPage = 10; // Nombre d'éléments par page
+  const itemsPerPage = 10;
 
+  // Charger les documents
   useEffect(() => {
     const params = new URLSearchParams({
       type: typeDocument,
     });
-    console.log(typeDocument);
-    axios.get(`http://localhost:5000/entetes?${params}`)
-      .then(response => {
-        console.log(response.data);
+    axios
+      .get(`http://localhost:5000/entetes?${params}`)
+      .then((response) => {
         setDocuments(response.data);
-        setFilteredDocuments(response.data); // Initialiser les documents filtrés
+        setFilteredDocuments(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Erreur de chargement des documents", error);
       });
   }, [typeDocument]);
 
-  // Fonction pour filtrer les documents
+  // Filtrer les documents
   const handleFilter = () => {
     const filtered = documents.filter((document) => {
       return (
@@ -49,41 +74,43 @@ const DocumentConsulter = ({ typeDocument }) => {
       );
     });
     setFilteredDocuments(filtered);
-    setCurrentPage(1); // Réinitialiser à la première page après le filtrage
+    setCurrentPage(1);
   };
 
-  // Fonction pour gérer la saisie dans le champ de recherche
+  // Gérer la recherche
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  // Fonction pour aller à la page précédente
+  // Pagination
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  // Fonction pour aller à la page suivante
   const handleNextPage = () => {
     if (currentPage < Math.ceil(filteredDocuments.length / itemsPerPage)) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // Calcul des documents à afficher pour la page actuelle
+  // Calcul des documents à afficher
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentDocuments = filteredDocuments.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Gérer la vue des détails
   const handleViewDetails = (id) => {
     navigate(`/${typeDocument}/${id}`);
   };
 
+  // Gérer l'édition
   const handleEdit = (id) => {
     navigate(`/${typeDocument}/edit/${id}`);
   };
 
+  // Gérer la suppression
   const handleDelete = (id) => {
     Swal.fire({
       title: "Êtes-vous sûr ?",
@@ -92,16 +119,17 @@ const DocumentConsulter = ({ typeDocument }) => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Oui, supprimer !"
+      confirmButtonText: "Oui, supprimer !",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.delete(`http://localhost:5000/entetes/${id}`)
+        axios
+          .delete(`http://localhost:5000/entetes/${id}`)
           .then(() => {
-            setDocuments(documents.filter(doc => doc._id !== id));
-            setFilteredDocuments(filteredDocuments.filter(doc => doc._id !== id)); // Mettre à jour les documents filtrés
+            setDocuments(documents.filter((doc) => doc._id !== id));
+            setFilteredDocuments(filteredDocuments.filter((doc) => doc._id !== id));
             Swal.fire("Supprimé !", "Le document a été supprimé.", "success");
           })
-          .catch(error => {
+          .catch((error) => {
             Swal.fire("Erreur", "Impossible de supprimer le document", "error");
             console.error("Erreur de suppression", error);
           });
@@ -109,9 +137,11 @@ const DocumentConsulter = ({ typeDocument }) => {
     });
   };
 
+  // Télécharger le PDF
   const handleDownload = (id) => {
-    axios.get(`http://localhost:5000/entetes/${id}/pdf`, { responseType: "blob" })
-      .then(response => {
+    axios
+      .get(`http://localhost:5000/entetes/${id}/pdf`, { responseType: "blob" })
+      .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
@@ -120,14 +150,161 @@ const DocumentConsulter = ({ typeDocument }) => {
         link.click();
         document.body.removeChild(link);
       })
-      .catch(error => {
+      .catch((error) => {
         Swal.fire("Erreur", "Impossible de télécharger le document", "error");
         console.error("Erreur de téléchargement", error);
       });
   };
 
+  // Ajouter un document
   const handleAddDocument = () => {
     navigate(`/${typeDocument}/ajouter`);
+  };
+
+  // Générer une facture
+  const genererFacture = (document) => {
+    const { numero, date, client, refBCC, pointDeVente, typePaiement, totalHT, totalTTC, lignes, commentaire } = document;
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.setTextColor(33, 150, 243);
+    doc.text("Facture", 15, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Numéro: ${numero}`, 15, 30);
+    doc.text(`Date: ${new Date(date).toLocaleDateString()}`, 15, 40);
+    doc.text(`Client: ${client.raisonSociale}`, 15, 50);
+    doc.text(`Réf. BCC: ${refBCC}`, 15, 60);
+    doc.text(`Point de Vente: ${pointDeVente}`, 15, 70);
+    doc.text(`Type de Paiement: ${typePaiement}`, 15, 80);
+    doc.text(`Commentaire: ${commentaire}`, 15, 90);
+
+    const tableData = lignes.map((ligne, index) => [
+      index + 1,
+      ligne.codeArticle,
+      ligne.famille,
+      ligne.libelleArticle,
+      ligne.quantite,
+      ligne.prixHT.toFixed(2),
+      ligne.remise.toFixed(2),
+      ligne.tva.toFixed(2),
+      ligne.prixTTC.toFixed(2),
+    ]);
+
+    const headers = [
+      "N°",
+      "Code Article",
+      "Famille",
+      "Libellé Article",
+      "Quantité",
+      "Prix HT",
+      "Remise",
+      "TVA",
+      "Prix TTC",
+    ];
+
+    autoTable(doc, {
+      startY: 100,
+      head: [headers],
+      body: tableData,
+      theme: "striped",
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        textColor: [0, 0, 0],
+        fillColor: [255, 255, 255],
+      },
+      headStyles: {
+        fillColor: [33, 150, 243],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+    });
+
+    doc.setFontSize(12);
+    doc.text(`Total HT: ${totalHT.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 10);
+    doc.text(`Total TTC: ${totalTTC.toFixed(2)}`, 15, doc.lastAutoTable.finalY + 20);
+
+    doc.save(`Facture_${numero}.pdf`);
+  };
+
+  // Ouvrir la fenêtre de génération
+  const ouvrirFenetreGeneration = (document) => {
+    setSelectedDocument(document);
+    setOpenModal(true);
+  };
+
+  // Fermer la fenêtre modale
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  // Gérer la génération du bon de commande ou de livraison
+  const handleGeneration = (typeDocumentChoisi) => {
+    if (!selectedDocument) return;
+
+    // Vérifier que tous les champs obligatoires sont présents
+    if (
+      !selectedDocument.numero ||
+      !selectedDocument.date ||
+      !selectedDocument.client ||
+      !selectedDocument.totalHT ||
+      !selectedDocument.totalTTC ||
+      !selectedDocument.lignes ||
+      selectedDocument.lignes.length === 0
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Données manquantes",
+        text: "Veuillez vérifier que tous les champs obligatoires sont remplis.",
+      });
+      return;
+    }
+
+    // Préparer les données à passer
+    const documentData = {
+      typeDocument: typeDocumentChoisi,
+      numero: typeDocumentChoisi === "Bon Commande" ? selectedDocument.numero.replace(/^DV/, "BC") : selectedDocument.numero.replace(/^DV/, "BL"),
+      date: selectedDocument.date,
+      client: {
+        code: selectedDocument.client.code || "N/A",
+        adresse: selectedDocument.client.adresse || "N/A",
+        matricule: selectedDocument.client.matricule || "N/A",
+        raisonSociale: selectedDocument.client.raisonSociale || "N/A",
+        telephone: selectedDocument.client.telephone || "N/A",
+      },
+      totalHT: selectedDocument.totalHT,
+      totalTTC: selectedDocument.totalTTC,
+      lignes: selectedDocument.lignes.map((ligne) => ({
+        codeArticle: ligne.codeArticle || "N/A",
+        famille: ligne.famille || "N/A",
+        libelleArticle: ligne.libelleArticle || "N/A",
+        quantite: ligne.quantite || 0,
+        prixHT: ligne.prixHT || 0,
+        remise: ligne.remise || 0,
+        tva: ligne.tva || 0,
+        prixTTC: ligne.prixTTC || 0,
+      })),
+      refBCC: selectedDocument.refBCC ,
+      pointDeVente: selectedDocument.pointDeVente ,
+      typePaiement: selectedDocument.typePaiement ,
+      commentaire: selectedDocument.commentaire ,
+    };
+
+    console.log("Données passées :", documentData);
+
+    if (typeDocumentChoisi === "Bon Commande") {
+      navigate("/bon-commande", { state: documentData });
+    } else if (typeDocumentChoisi === "Bon de Livraison") {
+      navigate("/bon-livraison", { state: documentData });
+    }
+
+    handleCloseModal();
   };
 
   return (
@@ -210,6 +387,20 @@ const DocumentConsulter = ({ typeDocument }) => {
                       <IconButton variant="contained" color="primary" onClick={() => handleDownload(document._id)}>
                         <DownloadIcon />
                       </IconButton>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          if (typeDocument !== "Devis") {
+                            genererFacture(document); // Générer directement la facture
+                          } else {
+                            ouvrirFenetreGeneration(document); // Ouvrir la fenêtre modale
+                          }
+                        }}
+                        size="small"
+                      >
+                        Générer
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -219,31 +410,50 @@ const DocumentConsulter = ({ typeDocument }) => {
 
           {/* Pagination personnalisée */}
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, mt: 2 }}>
-            {/* Bouton Précédent */}
             <Button
               variant="outlined"
               startIcon={<ArrowBackIcon />}
               onClick={handlePreviousPage}
-              disabled={currentPage === 1} // Désactiver si on est sur la première page
+              disabled={currentPage === 1}
             >
               Précédent
             </Button>
 
-            {/* Indicateur de page */}
             <Box>
               Page {currentPage} / {Math.ceil(filteredDocuments.length / itemsPerPage)}
             </Box>
 
-            {/* Bouton Suivant */}
             <Button
               variant="outlined"
               endIcon={<ArrowForwardIcon />}
               onClick={handleNextPage}
-              disabled={currentPage === Math.ceil(filteredDocuments.length / itemsPerPage)} // Désactiver si on est sur la dernière page
+              disabled={currentPage === Math.ceil(filteredDocuments.length / itemsPerPage)}
             >
               Suivant
             </Button>
           </Box>
+
+          {/* Fenêtre modale pour choisir le type de document */}
+          <Dialog open={openModal} onClose={handleCloseModal}>
+            <DialogTitle>Choisir le type de document</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Type de document</InputLabel>
+                <Select
+                  value={typeDocumentChoisi}
+                  onChange={(e) => setTypeDocumentChoisi(e.target.value)}
+                  size="small"
+                >
+                  <MenuItem value="Bon Commande">Bon de Commande</MenuItem>
+                  <MenuItem value="Bon de Livraison">Bon de Livraison</MenuItem>
+                </Select>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseModal} size="small">Annuler</Button>
+              <Button onClick={() => handleGeneration(typeDocumentChoisi)} color="primary" size="small">Générer</Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       </Box>
     </>

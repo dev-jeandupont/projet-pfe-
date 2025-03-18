@@ -7,6 +7,8 @@ import { Button, TextField } from "@mui/material";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; // Import explicite d'autoTable
+import axios from "axios"; // Importation d'axios
+import Swal from "sweetalert2"; // Importation de SweetAlert2
 
 const BonCommandePage = () => {
   const location = useLocation();
@@ -24,6 +26,38 @@ const BonCommandePage = () => {
     typePaiement,
     commentaire,
   } = location.state;
+
+  const enregistrerBonCommande = async () => {
+    try {
+      // Préparer les données à envoyer
+      const bonCommandeData = {
+        typeDocument: "Bon Commande",
+        numero,
+        date,
+        client,
+        referenceCommande: refBCC, // Correspond au champ attendu par le backend
+        pointVente: pointDeVente, // Correspond au champ attendu par le backend
+        typePaiement,
+        commentaire,
+        totalHT,
+        totalTTC,
+        lignes,
+      };
+console.log(bonCommandeData)
+      // Envoyer les données au serveur
+      const response = await axios.post("http://localhost:5000/entetes/devis", bonCommandeData);
+console.log(response)
+      // Afficher un message de succès
+      Swal.fire("Succès", "Le bon de commande a été enregistré avec succès.", "success");
+
+      // Rediriger l'utilisateur si nécessaire
+      navigate("/Home");
+    } catch (error) {
+      // Afficher un message d'erreur en cas d'échec
+      Swal.fire("Erreur", "Une erreur est survenue lors de l'enregistrement.", "error");
+      console.error("Erreur lors de l'enregistrement du bon de commande :", error);
+    }
+  };
 
   const genererFacture = () => {
     // Créer un nouveau document PDF
@@ -198,6 +232,15 @@ const BonCommandePage = () => {
               sx={{ marginRight: 2 }}
             >
               Générer Facture
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={enregistrerBonCommande}
+              sx={{ marginRight: 2 }}
+            >
+              Enregistrer 
             </Button>
             <Button variant="contained" color="primary" size="small" onClick={handleCancel}>
               Annuler

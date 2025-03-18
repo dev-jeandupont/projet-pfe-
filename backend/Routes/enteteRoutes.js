@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const enteteController = require('../Controllers/enteteController'); 
 
+
+router.get("/last-number", enteteController.getLastNumber);
 // Créer un devis
 router.post('/devis', enteteController.create);
 
