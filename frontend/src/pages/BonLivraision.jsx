@@ -22,8 +22,8 @@ const BonLivraisonPage = () => {
     totalHT,
     totalTTC,
     lignes,
-    refBCC,
-    pointDeVente,
+    referenceCommande: refBCC,
+    pointVente,
     typePaiement,
     commentaire,
   } = location.state;
@@ -52,7 +52,7 @@ const BonLivraisonPage = () => {
     doc.text(`Date: ${date}`, 15, 40);
     doc.text(`Client: ${client.raisonSociale}`, 15, 50);
     doc.text(`Réf. BCC: ${refBCC}`, 15, 60);
-    doc.text(`Point de Vente: ${pointDeVente}`, 15, 70);
+    doc.text(`Point de Vente: ${pointVente}`, 15, 70);
     doc.text(`Type de Paiement: ${typePaiement}`, 15, 80);
     doc.text(`Commentaire: ${commentaire}`, 15, 90);
 
@@ -233,7 +233,7 @@ const BonLivraisonPage = () => {
                   label="Point de Vente"
                   fullWidth
                   margin="normal"
-                  value={pointDeVente}
+                  value={pointVente}
                   size="small"
                   disabled
                 />

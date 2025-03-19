@@ -33,7 +33,7 @@ const DocumentForm = ({ typeDocument }) => {
   const [id, setId] = useState();
   // Ajout des nouveaux champs
   const [refBCC, setRefBCC] = useState("");
-  const [pointDeVente, setPointDeVente] = useState("");
+  const [pointVente, setpointVente] = useState("");
   const [typePaiement, setTypePaiement] = useState("");
   const [commentaire, setCommentaire] = useState("");
 
@@ -71,24 +71,44 @@ const DocumentForm = ({ typeDocument }) => {
   }, []);
 
   useEffect(() => {
-    handelnumero(date);
-  }, [date, type_achat]);
+    handelnumero(date, typeDocument);
+  }, [date, typeDocument]);
 
-  const handelnumero = (date) => {
+  const handelnumero = async (date, type_achat) => {
     if (date) {
       const today = new Date(date);
       const year = today.getFullYear().toString().slice(-2);
-      const month = (today.getMonth() + 1).toString().padStart(2, "0");
-      const day = today.getDate().toString().padStart(2, "0");
-      let entete = null;
-      if (type_achat === "Devis") {
-        entete = "DV";
-      } else if (type_achat === "Bon Commande") {
-        entete = "BC";
-      } else {
-        entete = "BL";
+
+      let entete =
+        type_achat === "Devis"
+          ? "DV"
+          : type_achat === "Bon Commande"
+          ? "BC"
+          : "BL";
+
+      try {
+        console.log(type_achat);
+        // Appel à l'API pour récupérer le nombre de documents existants
+        const response = await axios.get(
+          `http://localhost:5000/entetes/total/${type_achat}/${today.getFullYear()}`
+        );
+
+        if (response.status === 200) {
+          const documentCount = parseInt(response.data.documentCount, 10) || 0;
+
+          // Construire le numéro avec le compteur récupéré
+          setNumero(
+            `${entete}01${year}${String(documentCount + 1).padStart(4, "0")}`
+          );
+        } else {
+          console.error("Erreur API:", response.data.message);
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération du nombre de documents:",
+          error
+        );
       }
-      setNumero(`${entete}${year}${month}${day}0001`);
     }
   };
 
@@ -153,8 +173,8 @@ const DocumentForm = ({ typeDocument }) => {
       totalHT,
       totalTTC,
       lignes,
-      refBCC,
-      pointDeVente,
+      referenceCommande: refBCC,
+      pointVente,
       typePaiement,
       commentaire,
     };
@@ -202,8 +222,8 @@ const DocumentForm = ({ typeDocument }) => {
       totalHT,
       totalTTC,
       lignes,
-      refBCC,
-      pointDeVente,
+      referenceCommande: refBCC,
+      pointVente,
       typePaiement,
       commentaire,
     };
@@ -381,8 +401,8 @@ const DocumentForm = ({ typeDocument }) => {
                   label="Point de Vente"
                   fullWidth
                   margin="normal"
-                  value={pointDeVente}
-                  onChange={(e) => setPointDeVente(e.target.value)}
+                  value={pointVente}
+                  onChange={(e) => setpointVente(e.target.value)}
                   size="small"
                 />
                 <TextField

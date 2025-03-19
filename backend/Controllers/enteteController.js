@@ -1,7 +1,6 @@
 const Entete = require("../Models/Entete");
 const Ligne = require("../Models/Ligne");
 const PDFDocument = require("pdfkit");
-const fs = require("fs");
 
 // Modifier la méthode create pour générer automatiquement le numéro
 exports.create = async (req, res) => {
@@ -61,6 +60,25 @@ exports.create = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+exports.getTotalByTypeDocument = async (req, res) => {
+  console.log(req.params);
+  const { typeDocument, year } = req.params;
+
+  try {
+    // Compter le nombre de documents avec le typeDocument spécifié et l'année donnée
+    const documentCount = await Entete.countDocuments({
+      typeDocument,
+      date: {
+        $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+        $lt: new Date(`${year}-12-31T23:59:59.999Z`),
+      },
+    });
+    console.log(documentCount);
+    res.status(200).json({ typeDocument, year, documentCount });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 // Consulter tous les documents par type
 exports.getDocuments = async (req, res) => {
@@ -69,7 +87,6 @@ exports.getDocuments = async (req, res) => {
     const documents = await Entete.find({ typeDocument: type })
       .populate("client")
       .populate("lignes");
-    console.log(documents);
 
     res.status(200).json(documents);
   } catch (error) {
@@ -94,7 +111,6 @@ exports.getDocumentById = async (req, res) => {
 
 //  3. Éditer un document
 exports.updateDocument = async (req, res) => {
-  console.log(req.body);
   try {
     const updatedDocument = await Entete.findByIdAndUpdate(
       req.body.id,

@@ -5,11 +5,11 @@ const enteteController = require("../Controllers/enteteController");
 // Créer un devis
 router.post("/devis", enteteController.create);
 
-// Transformer un devis en bon de commande
-
-// Transformer un devis en bon de livraison
-
-//  Transformer un bon de commande en facture
+// donnee le soum de document selon le type et date
+router.get(
+  "/total/:typeDocument/:year",
+  enteteController.getTotalByTypeDocument
+);
 
 //  Consulter tous les documents par type
 router.get("", enteteController.getDocuments);

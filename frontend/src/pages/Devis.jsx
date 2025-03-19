@@ -6,12 +6,8 @@ export default function Devis() {
   return (
     <>
       <Navbar />
-     
-         
-        
-            {/* Afficher directement le formulaire sans bouton */}
-            <DocumentForm typeDocument="Devis" />
-         
+      {/* Afficher directement le formulaire sans bouton */}
+      <DocumentForm typeDocument="Devis" />
     </>
   );
 }

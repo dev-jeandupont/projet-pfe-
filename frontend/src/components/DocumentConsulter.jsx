@@ -72,6 +72,7 @@ const DocumentConsulter = ({ typeDocument }) => {
 
   const handleGeneration = () => {
     if (!selectedDocument) return;
+    console.log(selectedDocument);
     const documentData = {
       typeDocument: typeAchat,
       id: selectedDocument._id,
@@ -84,11 +85,12 @@ const DocumentConsulter = ({ typeDocument }) => {
       totalHT: selectedDocument.totalHT,
       totalTTC: selectedDocument.totalTTC,
       lignes: selectedDocument.lignes || [],
-      refBCC: selectedDocument.refBCC || "",
-      pointDeVente: selectedDocument.pointDeVente || "",
+      referenceCommande: selectedDocument.referenceCommande || "",
+      pointVente: selectedDocument.pointVente || "",
       typePaiement: selectedDocument.typePaiement || "",
       commentaire: selectedDocument.commentaire || "",
     };
+    console.log(documentData);
     navigate(`/${typeAchat.toLowerCase().replace(" ", "-")}`, {
       state: documentData,
     });
