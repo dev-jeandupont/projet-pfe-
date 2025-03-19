@@ -4,84 +4,108 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidenav from "../components/Sidenav";
 import Box from "@mui/material/Box";
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, TextField, InputAdornment } from "@mui/material";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  TextField,
+  InputAdornment,
+  MenuItem,
+  FormControl,
+  DialogContent,
+  InputLabel,
+  Select,
+  DialogActions,
+  DialogTitle,
+  Dialog,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import DownloadIcon from "@mui/icons-material/Download";
-import { Info as InfoIcon } from '@mui/icons-material';
+import { Info as InfoIcon } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search"; // Icône pour le filtre
+import SearchIcon from "@mui/icons-material/Search";
 import Swal from "sweetalert2";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack"; // Icône Précédent
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"; // Icône Suivant
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const DocumentConsulter = ({ typeDocument }) => {
   const [documents, setDocuments] = useState([]);
-  const [filteredDocuments, setFilteredDocuments] = useState([]); // Documents filtrés
-  const [searchTerm, setSearchTerm] = useState(""); // Terme de recherche
-  const [currentPage, setCurrentPage] = useState(1); // Page actuelle
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [typeAchat, setTypeAchat] = useState("Bon Commande");
 
-  const itemsPerPage = 10; // Nombre d'éléments par page
+  const navigate = useNavigate();
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    const params = new URLSearchParams({
-      type: typeDocument,
-    });
-    console.log(typeDocument);
-    axios.get(`http://localhost:5000/entetes?${params}`)
-      .then(response => {
-        console.log(response.data);
+    axios
+      .get(`http://localhost:5000/entetes?type=${typeDocument}`)
+      .then((response) => {
         setDocuments(response.data);
-        setFilteredDocuments(response.data); // Initialiser les documents filtrés
+        setFilteredDocuments(response.data);
       })
-      .catch(error => {
-        console.error("Erreur de chargement des documents", error);
-      });
+      .catch((error) => console.error("Erreur de chargement", error));
   }, [typeDocument]);
 
-  // Fonction pour filtrer les documents
   const handleFilter = () => {
-    const filtered = documents.filter((document) => {
-      return (
-        document.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        document.client.raisonSociale.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    setFilteredDocuments(
+      documents.filter(
+        (doc) =>
+          doc.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doc.client.raisonSociale
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      )
+    );
+    setCurrentPage(1);
+  };
+
+  const handleGeneration = () => {
+    if (!selectedDocument) return;
+    const documentData = {
+      typeDocument: typeAchat,
+      id: selectedDocument._id,
+      numero: selectedDocument.numero.replace(
+        /^DV/,
+        typeAchat === "Bon Commande" ? "BC" : "BL"
+      ),
+      date: selectedDocument.date,
+      client: selectedDocument.client,
+      totalHT: selectedDocument.totalHT,
+      totalTTC: selectedDocument.totalTTC,
+      lignes: selectedDocument.lignes || [],
+      refBCC: selectedDocument.refBCC || "",
+      pointDeVente: selectedDocument.pointDeVente || "",
+      typePaiement: selectedDocument.typePaiement || "",
+      commentaire: selectedDocument.commentaire || "",
+    };
+    navigate(`/${typeAchat.toLowerCase().replace(" ", "-")}`, {
+      state: documentData,
     });
-    setFilteredDocuments(filtered);
-    setCurrentPage(1); // Réinitialiser à la première page après le filtrage
+    setOpenModal(false);
   };
 
-  // Fonction pour gérer la saisie dans le champ de recherche
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  // Fonction pour aller à la page précédente
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  // Fonction pour aller à la page suivante
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredDocuments.length / itemsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  // Calcul des documents à afficher pour la page actuelle
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDocuments = filteredDocuments.slice(indexOfFirstItem, indexOfLastItem);
+  const currentDocuments = filteredDocuments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleViewDetails = (id) => {
-    navigate(`/${typeDocument}/${id}`);
+    navigate("/${typeDocument}/${id}");
   };
 
   const handleEdit = (id) => {
-    navigate(`/${typeDocument}/edit/${id}`);
+    navigate("/${typeDocument}/edit/${id}");
   };
 
   const handleDelete = (id) => {
@@ -92,16 +116,19 @@ const DocumentConsulter = ({ typeDocument }) => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Oui, supprimer !"
+      confirmButtonText: "Oui, supprimer !",
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.delete(`http://localhost:5000/entetes/${id}`)
+        axios
+          .delete("http://localhost:5000/entetes/${id}")
           .then(() => {
-            setDocuments(documents.filter(doc => doc._id !== id));
-            setFilteredDocuments(filteredDocuments.filter(doc => doc._id !== id)); // Mettre à jour les documents filtrés
+            setDocuments(documents.filter((doc) => doc._id !== id));
+            setFilteredDocuments(
+              filteredDocuments.filter((doc) => doc._id !== id)
+            ); // Mettre à jour les documents filtrés
             Swal.fire("Supprimé !", "Le document a été supprimé.", "success");
           })
-          .catch(error => {
+          .catch((error) => {
             Swal.fire("Erreur", "Impossible de supprimer le document", "error");
             console.error("Erreur de suppression", error);
           });
@@ -110,24 +137,21 @@ const DocumentConsulter = ({ typeDocument }) => {
   };
 
   const handleDownload = (id) => {
-    axios.get(`http://localhost:5000/entetes/${id}/pdf`, { responseType: "blob" })
-      .then(response => {
+    axios
+      .get("http://localhost:5000/entetes/${id}/pdf", { responseType: "blob" })
+      .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", `${typeDocument}_${id}.pdf`);
+        link.setAttribute("download", "${typeDocument}_${id}.pdf");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       })
-      .catch(error => {
+      .catch((error) => {
         Swal.fire("Erreur", "Impossible de télécharger le document", "error");
         console.error("Erreur de téléchargement", error);
       });
-  };
-
-  const handleAddDocument = () => {
-    navigate(`/${typeDocument}/ajouter`);
   };
 
   return (
@@ -138,25 +162,21 @@ const DocumentConsulter = ({ typeDocument }) => {
         <Sidenav />
         <Box component="main" sx={{ flexGrow: 1, p: 3, paddingTop: "350px" }}>
           <h1>Consultation {typeDocument}</h1>
-          {/* Bouton Ajouter */}
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={handleAddDocument}
-            sx={{ mb: 2 }}
+            onClick={() => navigate(`/${typeDocument}/ajouter`)}
           >
             Ajouter
           </Button>
-
-          {/* Champ de recherche et bouton de filtre */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, my: 2 }}>
             <TextField
-              label="Rechercher par numéro ou client"
+              label="Rechercher"
               variant="outlined"
               size="small"
               value={searchTerm}
-              onChange={handleSearchChange}
+              onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -164,7 +184,6 @@ const DocumentConsulter = ({ typeDocument }) => {
                   </InputAdornment>
                 ),
               }}
-              sx={{ flexGrow: 1 }}
             />
             <Button
               variant="contained"
@@ -175,8 +194,6 @@ const DocumentConsulter = ({ typeDocument }) => {
               Filtrer
             </Button>
           </Box>
-
-          {/* Tableau des documents */}
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
@@ -190,60 +207,76 @@ const DocumentConsulter = ({ typeDocument }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {currentDocuments.map((document) => (
-                  <TableRow key={document._id}>
-                    <TableCell>{document.numero}</TableCell>
-                    <TableCell>{new Date(document.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{document.client.raisonSociale}</TableCell>
-                    <TableCell>{document.totalHT.toFixed(2)}</TableCell>
-                    <TableCell>{document.totalTTC.toFixed(2)}</TableCell>
+                {currentDocuments.map((doc) => (
+                  <TableRow key={doc._id}>
+                    <TableCell>{doc.numero}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={() => handleViewDetails(document._id)}>
+                      {new Date(doc.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{doc.client.raisonSociale}</TableCell>
+                    <TableCell>{doc.totalHT.toFixed(2)}</TableCell>
+                    <TableCell>{doc.totalTTC.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleViewDetails(document._id)}
+                      >
                         <InfoIcon />
                       </IconButton>
-                      <IconButton color="primary" onClick={() => handleEdit(document._id)}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(document._id)}
+                      >
                         <EditIcon />
                       </IconButton>
-                      <IconButton color="primary" onClick={() => handleDelete(document._id)}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleDelete(document._id)}
+                      >
                         <DeleteIcon />
                       </IconButton>
-                      <IconButton variant="contained" color="primary" onClick={() => handleDownload(document._id)}>
+                      <IconButton
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleDownload(document._id)}
+                      >
                         <DownloadIcon />
                       </IconButton>
+                      <Button
+                        color="primary"
+                        onClick={() =>
+                          setSelectedDocument(doc) || setOpenModal(true)
+                        }
+                      >
+                        Genere
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </TableContainer>
-
-          {/* Pagination personnalisée */}
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2, mt: 2 }}>
-            {/* Bouton Précédent */}
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1} // Désactiver si on est sur la première page
-            >
-              Précédent
-            </Button>
-
-            {/* Indicateur de page */}
-            <Box>
-              Page {currentPage} / {Math.ceil(filteredDocuments.length / itemsPerPage)}
-            </Box>
-
-            {/* Bouton Suivant */}
-            <Button
-              variant="outlined"
-              endIcon={<ArrowForwardIcon />}
-              onClick={handleNextPage}
-              disabled={currentPage === Math.ceil(filteredDocuments.length / itemsPerPage)} // Désactiver si on est sur la dernière page
-            >
-              Suivant
-            </Button>
-          </Box>
+          <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+            <DialogTitle>Choisir le type de document</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth>
+                <InputLabel>Type de document</InputLabel>
+                <Select
+                  value={typeAchat}
+                  onChange={(e) => setTypeAchat(e.target.value)}
+                >
+                  <MenuItem value="Bon Commande">Bon de Commande</MenuItem>
+                  <MenuItem value="Bon Livraison">Bon de Livraison</MenuItem>
+                </Select>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenModal(false)}>Annuler</Button>
+              <Button onClick={handleGeneration} color="primary">
+                Générer
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       </Box>
     </>
